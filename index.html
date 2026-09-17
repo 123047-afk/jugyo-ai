@@ -32,7 +32,7 @@ label{
   font-weight:bold;
   margin-bottom:8px;
 }
-input[type=text]{
+input[type=text],select{
   width:100%;
   padding:12px;
   border:1px solid #ddd;
@@ -88,7 +88,14 @@ audio{width:100%;margin:10px 0}
   <section class="card">
     <label for="lesson">授業タイトル</label>
     <input id="lesson" type="text" placeholder="例：数学・外心と垂心">
-
+<label for="subject">科目</label>
+<select id="subject">
+  <option value="日本史">日本史</option>
+  <option value="世界史">世界史</option>
+  <option value="公共">公共</option>
+  <option value="化学">化学</option>
+  <option value="生物">生物</option>
+</select>
     <div class="timer" id="timer">00:00:00</div>
     <div class="status" id="status">録音待機中</div>
 
@@ -165,13 +172,14 @@ start.addEventListener("click", async () => {
       const blob = new Blob(chunks,{type:"audio/webm"});
       const url = URL.createObjectURL(blob);
       const title = lesson.value.trim() || "授業録音";
+      const subject = document.getElementById("subject").value;
       const date = new Date().toLocaleString("ja-JP");
 
       const item = document.createElement("div");
       item.className = "record";
 
       const heading = document.createElement("strong");
-      heading.textContent = title;
+      heading.textContent = subject + "｜" + title;
 
       const info = document.createElement("div");
       info.className = "empty";
