@@ -1,248 +1,618 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>授業AI君</title>
+
 <style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f4f6f8;
-  color:#202124;
+* {
+  box-sizing: border-box;
 }
-main{
-  max-width:600px;
-  margin:0 auto;
-  padding:24px 16px;
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f5f9;
+  color: #202124;
 }
-h1{margin:0 0 6px;font-size:26px}
-.sub{color:#666;margin-bottom:24px}
-.card{
-  background:white;
-  border-radius:18px;
-  padding:24px;
-  box-shadow:0 2px 10px #0000000d;
-  margin-bottom:16px;
+
+main {
+  max-width: 700px;
+  margin: auto;
+  padding: 25px 16px;
 }
-label{
-  display:block;
-  font-weight:bold;
-  margin-bottom:8px;
+
+h1 {
+  margin-bottom: 5px;
 }
-input[type=text],select{
-  width:100%;
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:10px;
-  font-size:16px;
-  margin-bottom:20px;
+
+.sub {
+  color: #666;
+  margin-bottom: 20px;
 }
-.timer{
-  text-align:center;
-  font-size:48px;
-  font-weight:bold;
-  margin:20px 0 8px;
-  font-variant-numeric:tabular-nums;
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px #00000015;
 }
-.status{text-align:center;color:#666;margin-bottom:22px}
-.buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-button,.download{
-  border:0;
-  border-radius:12px;
-  padding:13px 20px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-block;
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 7px;
 }
-.start{background:#1769e0;color:white}
-.stop{background:#e53935;color:white}
-button:disabled{opacity:.4;cursor:not-allowed}
-.notice{
-  font-size:14px;
-  color:#666;
-  margin-top:18px;
-  line-height:1.6;
+
+select,
+input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 9px;
+  font-size: 16px;
+  margin-bottom: 15px;
 }
-.record{
-  border-top:1px solid #eee;
-  padding:16px 0;
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  margin: 4px;
 }
-.record:first-child{border-top:0}
-.record strong{display:block;margin-bottom:6px}
-audio{width:100%;margin:10px 0}
-.download{background:#e8f0fe;color:#174ea6}
-.delete{background:#eee;color:#333;margin-left:6px}
-.empty{color:#777;font-size:14px}
+
+.start {
+  background: #2563eb;
+  color: white;
+}
+
+.stop {
+  background: #dc2626;
+  color: white;
+}
+
+.normal {
+  background: #e5e7eb;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status {
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.timer {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  margin: 15px;
+}
+
+.transcript {
+  background: #f8fafc;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  min-height: 180px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.interim {
+  color: #777;
+}
+
+.record {
+  border-top: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.record:first-child {
+  border-top: none;
+}
+
+audio {
+  width: 100%;
+  margin-top: 8px;
+}
 </style>
 </head>
+
 <body>
+
 <main>
-  <h1>🎓 授業AI君</h1>
-  <div class="sub">授業を録音して、あとで復習しよう</div>
 
-  <section class="card">
-    <label for="lesson">授業タイトル</label>
-    <input id="lesson" type="text" placeholder="例：数学・外心と垂心">
-<label for="subject">科目</label>
+<h1>🎓 授業AI君</h1>
+<div class="sub">授業を録音して、リアルタイムで文字起こし</div>
+
+<div class="card">
+
+<label>科目</label>
+
 <select id="subject">
-  <option value="日本史">日本史</option>
-  <option value="世界史">世界史</option>
-  <option value="公共">公共</option>
-  <option value="化学">化学</option>
-  <option value="生物">生物</option>
+  <option>日本史</option>
+  <option>世界史</option>
+  <option>公共</option>
+  <option>化学</option>
+  <option>生物</option>
 </select>
-    <div class="timer" id="timer">00:00:00</div>
-    <div class="status" id="status">録音待機中</div>
 
-    <div class="buttons">
-      <button class="start" id="start">● 録音開始</button>
-      <button class="stop" id="stop" disabled>■ 録音終了</button>
-    </div>
+<label>授業タイトル</label>
 
-    <div class="notice" id="notice">
-      録音開始を押すと、マイクの使用許可を求めます。
-    </div>
-  </section>
+<input id="title" placeholder="例：モル濃度">
 
-  <section class="card">
-    <h2>📚 録音した授業</h2>
-    <div id="records">
-      <div class="empty" id="empty">まだ録音はありません。</div>
-    </div>
-  </section>
+<div class="status" id="status">
+⚪ 待機中
+</div>
+
+<div class="timer" id="timer">
+00:00
+</div>
+
+<button class="start" id="startBtn">
+🎙️ 録音開始
+</button>
+
+<button class="stop" id="stopBtn" disabled>
+⏹️ 録音終了
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>📝 リアルタイム文字起こし</h2>
+
+<div class="transcript" id="transcript">
+ここに授業の内容が表示されます。
+</div>
+
+<br>
+
+<button class="normal" id="copyBtn">
+📋 文字起こしをコピー
+</button>
+
+<button class="normal" id="summaryBtn">
+📚 要約用テキストを作る
+</button>
+
+</div>
+
+
+<div class="card">
+
+<h2>🎧 録音一覧</h2>
+
+<div id="recordings">
+まだ録音はありません。
+</div>
+
+</div>
+
 </main>
 
+
 <script>
-const start = document.getElementById("start");
-const stop = document.getElementById("stop");
-const timer = document.getElementById("timer");
-const status = document.getElementById("status");
-const notice = document.getElementById("notice");
-const lesson = document.getElementById("lesson");
-const records = document.getElementById("records");
-const empty = document.getElementById("empty");
 
-let recorder = null;
-let chunks = [];
-let stream = null;
-let startedAt = 0;
-let timerId = null;
-let elapsed = 0;
+let mediaRecorder;
+let audioChunks = [];
+let stream;
 
-function format(seconds){
-  const h = String(Math.floor(seconds/3600)).padStart(2,"0");
-  const m = String(Math.floor(seconds%3600/60)).padStart(2,"0");
-  const s = String(seconds%60).padStart(2,"0");
-  return h+":"+m+":"+s;
+let recognition;
+let recognizing = false;
+
+let finalText = "";
+let interimText = "";
+
+let startTime;
+let timerInterval;
+
+
+/* =========================
+   タイマー
+========================= */
+
+function updateTimer() {
+
+  const elapsed = Date.now() - startTime;
+
+  const seconds = Math.floor(elapsed / 1000);
+
+  const min = String(Math.floor(seconds / 60)).padStart(2, "0");
+
+  const sec = String(seconds % 60).padStart(2, "0");
+
+  document.getElementById("timer").textContent =
+    `${min}:${sec}`;
 }
 
-function updateTimer(){
-  elapsed = Math.floor((Date.now()-startedAt)/1000);
-  timer.textContent = format(elapsed);
-}
 
-function message(text){
-  notice.textContent = text;
-}
+/* =========================
+   文字起こし
+========================= */
 
-start.addEventListener("click", async () => {
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    message("このChromeではマイク録音に対応していない可能性があります。");
-    return;
+function setupSpeechRecognition() {
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+
+    alert(
+      "このブラウザではリアルタイム文字起こしに対応していません。"
+    );
+
+    return null;
   }
 
-  try{
-    stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    recorder = new MediaRecorder(stream);
-    chunks = [];
-    startedAt = Date.now();
-    elapsed = 0;
-    timer.textContent = "00:00:00";
+  const r = new SpeechRecognition();
 
-    recorder.ondataavailable = event => {
-      if(event.data.size > 0) chunks.push(event.data);
-    };
+  r.lang = "ja-JP";
 
-    recorder.onstop = () => {
-      const blob = new Blob(chunks,{type:"audio/webm"});
-      const url = URL.createObjectURL(blob);
-      const title = lesson.value.trim() || "授業録音";
-      const subject = document.getElementById("subject").value;
-      const date = new Date().toLocaleString("ja-JP");
+  r.continuous = true;
 
-      const item = document.createElement("div");
-      item.className = "record";
+  r.interimResults = true;
 
-      const heading = document.createElement("strong");
-      heading.textContent = subject + "｜" + title;
+  r.onstart = function() {
 
-      const info = document.createElement("div");
-      info.className = "empty";
-      info.textContent = date + " / " + format(elapsed);
+    recognizing = true;
 
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.src = url;
-      audio.preload = "none";
+  };
 
-      const download = document.createElement("a");
-      download.className = "download";
-      download.textContent = "音声を保存";
-      download.href = url;
-      download.download = title.replace(/[\\/:*?"<>|]/g,"_")+".webm";
+  r.onresult = function(event) {
 
-      const remove = document.createElement("button");
-      remove.className = "delete";
-      remove.textContent = "削除";
-      remove.addEventListener("click",()=>{
-        URL.revokeObjectURL(url);
-        item.remove();
-        if(records.querySelectorAll(".record").length===0){
-          empty.style.display="block";
-        }
-      });
+    interimText = "";
 
-      item.append(heading,info,audio,download,remove);
-      records.prepend(item);
-      empty.style.display="none";
+    for (
+      let i = event.resultIndex;
+      i < event.results.length;
+      i++
+    ) {
 
-      if(stream){
-        stream.getTracks().forEach(track=>track.stop());
-        stream=null;
+      const text =
+        event.results[i][0].transcript;
+
+      if (event.results[i].isFinal) {
+
+        finalText += text + " ";
+
+      } else {
+
+        interimText += text;
+
       }
 
-      start.disabled=false;
-      stop.disabled=true;
-      status.textContent="録音待機中";
-      message("録音が完成しました。音声を保存できます。");
-    };
+    }
 
-    recorder.start(1000);
-    start.disabled=true;
-    stop.disabled=false;
-    status.textContent="🔴 録音中";
-    message("録音中です。授業が終わったら録音終了を押してください。");
-    timerId=setInterval(updateTimer,1000);
+    document.getElementById("transcript").innerHTML =
+      escapeHtml(finalText) +
+      '<span class="interim">' +
+      escapeHtml(interimText) +
+      '</span>';
 
-  }catch(error){
-    if(stream) stream.getTracks().forEach(track=>track.stop());
-    stream=null;
-    message("マイクを使用できませんでした。Chromeのマイク許可を確認してください。");
+  };
+
+  r.onerror = function(event) {
+
+    console.log("Speech recognition error:", event.error);
+
+  };
+
+  r.onend = function() {
+
+    recognizing = false;
+
+    /*
+      録音中なら自動的に再スタート
+    */
+
+    if (mediaRecorder &&
+        mediaRecorder.state === "recording") {
+
+      try {
+        r.start();
+      } catch(e) {}
+
+    }
+
+  };
+
+  return r;
+}
+
+
+/* HTMLを安全に表示 */
+
+function escapeHtml(text) {
+
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br>");
+
+}
+
+
+/* =========================
+   録音開始
+========================= */
+
+document.getElementById("startBtn")
+.addEventListener("click", async function() {
+
+  try {
+
+    stream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
+
+    audioChunks = [];
+
+    mediaRecorder =
+      new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable =
+      function(event) {
+
+        if (event.data.size > 0) {
+
+          audioChunks.push(event.data);
+
+        }
+
+      };
+
+
+    mediaRecorder.start();
+
+    startTime = Date.now();
+
+    timerInterval =
+      setInterval(updateTimer, 1000);
+
+
+    finalText = "";
+
+    interimText = "";
+
+    document.getElementById("transcript").textContent =
+      "文字起こしを開始しています…";
+
+
+    recognition = setupSpeechRecognition();
+
+    if (recognition) {
+
+      try {
+        recognition.start();
+      } catch(e) {}
+
+    }
+
+
+    document.getElementById("status").textContent =
+      "🔴 録音・文字起こし中";
+
+    document.getElementById("startBtn").disabled =
+      true;
+
+    document.getElementById("stopBtn").disabled =
+      false;
+
   }
+
+  catch(error) {
+
+    alert(
+      "マイクを使用できませんでした。\n" +
+      error.message
+    );
+
+  }
+
 });
 
-stop.addEventListener("click",()=>{
-  if(recorder && recorder.state==="recording"){
-    clearInterval(timerId);
-    timerId=null;
-    recorder.stop();
+
+/* =========================
+   録音終了
+========================= */
+
+document.getElementById("stopBtn")
+.addEventListener("click", function() {
+
+  if (!mediaRecorder) return;
+
+  mediaRecorder.stop();
+
+  clearInterval(timerInterval);
+
+  if (recognition) {
+
+    try {
+      recognition.stop();
+    } catch(e) {}
+
   }
+
+  if (stream) {
+
+    stream.getTracks().forEach(
+      track => track.stop()
+    );
+
+  }
+
+  document.getElementById("status").textContent =
+    "🟢 録音終了";
+
+  document.getElementById("startBtn").disabled =
+    false;
+
+  document.getElementById("stopBtn").disabled =
+    true;
+
+
+  mediaRecorder.onstop = function() {
+
+    const blob =
+      new Blob(audioChunks, {
+        type: "audio/webm"
+      });
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const title =
+      document.getElementById("title").value ||
+      "無題の授業";
+
+    const subject =
+      document.getElementById("subject").value;
+
+    addRecording(
+      subject,
+      title,
+      url
+    );
+
+  };
+
 });
+
+
+/* =========================
+   録音一覧
+========================= */
+
+function addRecording(subject, title, url) {
+
+  const container =
+    document.getElementById("recordings");
+
+  if (
+    container.textContent.trim() ===
+    "まだ録音はありません。"
+  ) {
+
+    container.innerHTML = "";
+
+  }
+
+  const div =
+    document.createElement("div");
+
+  div.className = "record";
+
+  div.innerHTML = `
+    <strong>${escapeHtml(title)}</strong>
+    <br>
+    <small>${escapeHtml(subject)}</small>
+
+    <audio controls src="${url}"></audio>
+
+    <br>
+
+    <a
+      href="${url}"
+      download="${escapeHtml(title)}.webm"
+    >
+      🎧 音声を保存
+    </a>
+  `;
+
+  container.prepend(div);
+
+}
+
+
+/* =========================
+   コピー
+========================= */
+
+document.getElementById("copyBtn")
+.addEventListener("click", async function() {
+
+  const text = finalText.trim();
+
+  if (!text) {
+
+    alert("まだ文字起こしがありません。");
+
+    return;
+
+  }
+
+  await navigator.clipboard.writeText(text);
+
+  alert("文字起こしをコピーしました！");
+
+});
+
+
+/* =========================
+   要約用テキスト
+========================= */
+
+document.getElementById("summaryBtn")
+.addEventListener("click", async function() {
+
+  const text = finalText.trim();
+
+  if (!text) {
+
+    alert("まだ文字起こしがありません。");
+
+    return;
+
+  }
+
+  const subject =
+    document.getElementById("subject").value;
+
+  const title =
+    document.getElementById("title").value ||
+    "授業";
+
+  const prompt =
+`以下は高校の${subject}「${title}」の授業の文字起こしです。
+
+この内容を高校生向けに整理してください。
+
+【授業の要約】
+授業全体の内容を簡潔にまとめる。
+
+【重要語句】
+重要な用語と、その意味を整理する。
+
+【テストに出そうなところ】
+先生が説明した内容から、テストに出そうなポイントを整理する。
+
+【文字起こし】
+${text}`;
+
+  await navigator.clipboard.writeText(prompt);
+
+  alert(
+    "要約用の文章をコピーしました！\n" +
+    "ChatGPTに貼り付ければ要約できます。"
+  );
+
+});
+
 </script>
+
 </body>
 </html>
